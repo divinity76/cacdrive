@@ -508,32 +508,6 @@ bool memory_is_all_zeroes(char const* const begin, std::size_t const bytes)
 	return memory_is_all_zeroes(
 			reinterpret_cast<unsigned char const* const >(begin), bytes);
 }
-uint64_t nigghash(const char *buf, size_t len)
-{
-	uint64_t ret;
-	while (len >= sizeof(uint64_t))
-	{
-		len -= sizeof(uint64_t);
-		ret += *(uint64_t*) &buf[len];
-	}
-	if (len >= sizeof(uint32_t))
-	{
-		len -= sizeof(uint32_t);
-		ret += *(uint32_t*) &buf[len];
-	}
-	if (len >= sizeof(uint16_t))
-	{
-		len -= sizeof(uint16_t);
-		ret += *(uint16_t*) &buf[len];
-	}
-	if (len != 0)
-	{
-		//len-=1;
-		ret += *(uint8_t*) &buf[len];
-	}
-	assert(len == 0 || len == 1);
-	return ret;
-}
 void sector_copy(const string& src, char *target)
 {
 	assert(src.length() == 0 || src.length() == SECTOR_SIZE);
