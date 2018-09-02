@@ -22,3 +22,7 @@ where 10000 is the number of sectors you want. each sector is 4096 bytes of clou
 # configuration
 you can find an example configuration [here](https://github.com/divinity76/cacdrive/blob/master/config.conf.dist) - that said, 
 the config file is line based, 1st line must be `format=1`, 2nd line is ignored (but must exist), line 3 contains the username (usually/always? an email), line 4 contains the password, line 5 contains the number of worker threads you want (higher count should increase IO speed, and it does not depend on how many CPU cores you have.. but try a low number first time around), line 6 contains the path to the sector index file, line 7 contains the nbd device to use (/dev/nbdX), and line 8 should not exist. a username or password or filepath containing newlines is not supported.
+
+
+# ???
+by the way, cacdrive is not assosiated with nor endorsed by C@C the company/staff in any way (afaik)
