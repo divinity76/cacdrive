@@ -1,3 +1,13 @@
+sectorindex.sec
+config.conf
+
+#<eclipse>
+.settings/
+.project
+.cproject
+Debug/
+#</eclipse>
+
 # Prerequisites
 *.d
 
@@ -30,3 +40,4 @@
 *.exe
 *.out
 *.app
+*.mk
