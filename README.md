@@ -24,5 +24,42 @@ you can find an example configuration [here](https://github.com/divinity76/cacdr
 the config file is line based, 1st line must be `format=1`, 2nd line is ignored (but must exist), line 3 contains the username (usually/always? an email), line 4 contains the password, line 5 contains the number of worker threads you want (higher count should increase IO speed, and it does not depend on how many CPU cores you have.. but try a low number first time around), line 6 contains the path to the sector index file, line 7 contains the nbd device to use (/dev/nbdX), and line 8 should not exist. a username or password or filepath containing newlines is not supported.
 
 
+# getting started
+
+here's how to get started, using a debian-based distro (Debian/Ubuntu/Proxmox/Devuan/whatever)
+(personally tested on debian 10 buster and ubuntu 18.04)
+```sh
+sudo apt install g++ git libcurl4-openssl-dev nano parted
+
+git clone --depth 1 https://github.com/divinity76/cacdrive.git
+
+cd cacdrive
+
+g++ src/main.cpp -std=c++17 -lcurl -lpthread
+
+cp config.conf.dist config.conf
+
+nano config.conf
+<insert username and password in config.conf>
+
+dd if=/dev/zero of=sectorindex.sec bs=25 count=10000
+
+sudo ./a.out config.conf api-tests
+<make sure this does not crash horribly or something>
+
+sudo ./a.out config.conf
+<now wait for all worker threads to get ready, then open another terminal, if you have a GUI, use gparted, otherwise>
+
+sudo dd if=/dev/zero of=/dev/nbd1
+sudo time sync
+<this is just testing, it should say "out of disk space" rather quickly if everything is working correctly.>
+sudo mkfs.ext4 /dev/nbd1
+<you can replace ext4 with whatever filesystem you want. for example, if you want a compressing filesystem (which might be a good  idea), you can use mkfs.btrfs instead of mkfs.ext4>
+mkdir mountpoint
+sudo mount /dev/nbd1 mountpoint
+```
+- now the mountpoint folder should be cacdrive! :) 
+
+
 # ???
 by the way, cacdrive is not assosiated with nor endorsed by C@C the company/staff in any way (afaik)
