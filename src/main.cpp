@@ -565,6 +565,9 @@ private:
 	string responsebuf;
 	void login();
 	void logout();
+	std::thread cookie_session_keepalive_thread;
+	CURL *cookie_session_keepalive_thread_curl;
+	time_t last_interaction_time;
 	static size_t curl_write_hook(const void * read_ptr, const size_t size,
 			const size_t count, void *s_ptr);
 
@@ -589,6 +592,7 @@ size_t Downloadcacapi::curl_write_hook(const void * read_ptr, const size_t size,
 
 string Downloadcacapi::download(const string& id)
 {
+	this->last_interaction_time = time(NULL);
 	ecurl_easy_setopt(this->ch, CURLOPT_HTTPGET, 1);
 	return (this->curl_exec(
 			"https://download.cloudatcost.com/user/download.php?filecode="
@@ -597,13 +601,22 @@ string Downloadcacapi::download(const string& id)
 vector<string> Downloadcacapi::download_multi(const vector<string> codes)
 {
 
-	const int num = codes.size();
+	const size_t num = codes.size();
 	vector<string> ret;
+	if (num < 1)
+	{
+		//wtf
+		return ret;
+	}
+	else
+	{
+		this->last_interaction_time = time(NULL);
+	}
 	ret.resize(num);
 	CURL *handles[num];
 	CURLM *multi_handle = ecurl_multi_init();
 	int still_running; /* keep number of running handles */
-	for (int i = 0; i < num; ++i)
+	for (size_t i = 0; i < num; ++i)
 	{
 		//handles[i] = ecurl_easy_duphandle_with_cookies(this->ch);
 		handles[i] = ecurl_easy_init();
@@ -644,7 +657,7 @@ vector<string> Downloadcacapi::download_multi(const vector<string> codes)
 	} while (still_running);
 	{
 		ecurl_multi_cleanup(multi_handle);
-		for (int i = 0; i < num; ++i)
+		for (size_t i = 0; i < num; ++i)
 		{
 			curl_easy_cleanup(handles[i]);
 		}
@@ -654,8 +667,18 @@ vector<string> Downloadcacapi::download_multi(const vector<string> codes)
 vector<string> Downloadcacapi::upload_multi(
 		const vector<Downloadcacapi::Upload_multi_arg> args)
 {
-	const int num = args.size();
+	const size_t num = args.size();
 	vector<string> ret;
+	if (num < 1)
+	{
+		//wtf
+		return ret;
+	}
+	else
+	{
+		this->last_interaction_time = time(NULL);
+	}
+
 	ret.resize(num);
 	CURL *handles[num] =
 	{ NULL };
@@ -667,7 +690,7 @@ vector<string> Downloadcacapi::upload_multi(
 	slist1 = ecurl_slist_append(slist1, "X-Requested-With: XMLHttpRequest");
 	CURLM *multi_handle = ecurl_multi_init();
 	int still_running; /* keep number of running handles */
-	for (int i = 0; i < num; ++i)
+	for (size_t i = 0; i < num; ++i)
 	{
 		//handles[i] = ecurl_easy_duphandle_with_cookies(this->ch);
 		handles[i] = ecurl_easy_init();
@@ -724,7 +747,7 @@ vector<string> Downloadcacapi::upload_multi(
 	} while (still_running);
 	{
 		ecurl_multi_cleanup(multi_handle);
-		for (int i = 0; i < num; ++i)
+		for (size_t i = 0; i < num; ++i)
 		{
 			//ecurl_easy_setopt(handles[i], CURLOPT_MIMEPOST, NULL);
 			//ecurl_easy_setopt(handles[i], CURLOPT_HTTPHEADER, NULL);
@@ -752,7 +775,7 @@ vector<string> Downloadcacapi::upload_multi(
 }
 string Downloadcacapi::upload(const string& data, const string& savename)
 {
-//todo: more error checking in this function
+	this->last_interaction_time = time(NULL);
 	curl_mime *mime1 = NULL;
 	curl_mimepart *part1 = NULL;
 	struct curl_slist *slist1 = NULL;
@@ -800,6 +823,8 @@ string Downloadcacapi::upload(const string& data, const string& savename)
 }
 void Downloadcacapi::delete_upload(const string& id)
 {
+	this->last_interaction_time = time(NULL);
+
 	ecurl_easy_setopt(this->ch, CURLOPT_POST, 1);
 	ecurl_easy_setopt(this->ch, CURLOPT_COPYPOSTFIELDS,
 			string("act=1&filecode=" + urlencode(id)).c_str());
@@ -821,20 +846,21 @@ future<bool> Downloadcacapi::async_delete_upload(const string& id)
 {
 	CURL *acurl = ecurl_easy_init();
 	ecurl_clone_cookies(this->ch, acurl);
-	return std::async(
-			[](CURL *acurl, const string id)->bool
+	return std::async([](CURL *acurl, const string id)->bool
+	{
+		//mhmhmthis->last_interaction_time = time(NULL);
+
+			ecurl_easy_setopt(acurl, CURLOPT_POST, 1);
+			ecurl_easy_setopt(acurl, CURLOPT_COPYPOSTFIELDS,
+					string("act=1&filecode=" + urlencode(id)).c_str());
+			string response;
+			ecurl_easy_setopt(acurl,CURLOPT_WRITEFUNCTION,Downloadcacapi::curl_write_hook);
+			ecurl_easy_setopt(acurl,CURLOPT_WRITEDATA,&response);
+			ecurl_easy_setopt(acurl,CURLOPT_URL,"https://download.cloudatcost.com/user/uploaded_files.php");
+			ecurl_easy_perform(acurl);
+			curl_easy_cleanup(acurl);
+			if (response.length() != 1 || response[0] != 'y')
 			{
-				ecurl_easy_setopt(acurl, CURLOPT_POST, 1);
-				ecurl_easy_setopt(acurl, CURLOPT_COPYPOSTFIELDS,
-						string("act=1&filecode=" + urlencode(id)).c_str());
-				string response;
-				ecurl_easy_setopt(acurl,CURLOPT_WRITEFUNCTION,Downloadcacapi::curl_write_hook);
-				ecurl_easy_setopt(acurl,CURLOPT_WRITEDATA,&response);
-				ecurl_easy_setopt(acurl,CURLOPT_URL,"https://download.cloudatcost.com/user/uploaded_files.php");
-				ecurl_easy_perform(acurl);
-				curl_easy_cleanup(acurl);
-				if (response.length() != 1 || response[0] != 'y')
-				{
 #ifdef DEBUG
 			std::cerr << "Warning: async_delete_upload() failed! invalid response from api! " << " id: " << id << "\n" << "response length: " << response.length() << ": "
 			<< response << std::endl;
@@ -866,12 +892,45 @@ Downloadcacapi::Downloadcacapi(const string& username, const string& password) :
 	ecurl_easy_setopt(this->ch, CURLOPT_ACCEPT_ENCODING, ""); // this should make login/logout faster, but it might make sector upload/download slower, or just use more cpu.. hmm
 	ecurl_easy_setopt(this->ch, CURLOPT_USERAGENT, "cacdrive-dev");
 	this->login();
-}
+	this->cookie_session_keepalive_thread_curl = ecurl_easy_init();
+	ecurl_clone_cookies(this->ch, this->cookie_session_keepalive_thread_curl);
+	this->last_interaction_time = time(NULL);
+	cookie_session_keepalive_thread =
+			std::thread(
+					[this]()->void
+					{
+						string unused_reply_buffer;
+						ecurl_easy_setopt(this->cookie_session_keepalive_thread_curl,CURLOPT_WRITEDATA,&unused_reply_buffer);
+						ecurl_easy_setopt(this->cookie_session_keepalive_thread_curl,CURLOPT_URL,"https://download.cloudatcost.com/user/settings.php");
+						ecurl_easy_setopt(this->cookie_session_keepalive_thread_curl,CURLOPT_HTTPGET,1);
+						ecurl_easy_setopt(this->cookie_session_keepalive_thread_curl,CURLOPT_WRITEFUNCTION,Downloadcacapi::curl_write_hook);
+						for(;;)
+						{
+							this_thread::sleep_for(chrono::seconds(1));
+							if(this->last_interaction_time==0)
+							{
+								// 0 is a magic value for `time to shut down`.
+								return;
+							}
+							if(this->last_interaction_time > (time(NULL)-(20*60)))
+							{
+								continue;
+							}
+							//cout << "20min ping.. last: " << this->last_interaction_time << " - now: " << time(NULL) << endl;
+							//been over 10 minutes since the last interaction, time to send a keepalive ping.
+							ecurl_easy_perform(this->cookie_session_keepalive_thread_curl);
+							this->last_interaction_time=time(NULL);
+							unused_reply_buffer.clear();
+						}
+					});
+} //
 Downloadcacapi::~Downloadcacapi()
 {
+	this->last_interaction_time = 0; // magic value for shut down.
+	this->cookie_session_keepalive_thread.join(); // a signal would be faster/better... not sure how to implement that.
 	this->logout();
 	curl_easy_cleanup(this->ch);
-	this->responsebuf.clear();
+	curl_easy_cleanup(this->cookie_session_keepalive_thread_curl);
 }
 void Downloadcacapi::login()
 {
@@ -1071,7 +1130,7 @@ void cac_upload_eventually(const uint64_t sectorpos_in, const uint32_t len,
 											break;
 										}
 									}
-									cout << "upload queue no longer empty! (" << size << ")" <<  endl;
+									cout << "upload queue no longer empty! (" << size << ")" << endl;
 								}
 							}
 						});
