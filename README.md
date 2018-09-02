@@ -13,7 +13,7 @@ here's how to get started, using a debian-based distro (Debian/Ubuntu/Proxmox/De
 ```sh
 sudo apt install g++ git libcurl4-openssl-dev nano nbd-client
 
-sudo mobprobe nbd
+sudo modprobe nbd
 <modprobe should NOT give any output. if it does, that is probably an error.>
 
 git clone --depth 1 https://github.com/divinity76/cacdrive.git
