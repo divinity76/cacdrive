@@ -46,7 +46,7 @@ sudo mkfs.ext4 /dev/nbd1
 mkdir mountpoint
 
 sudo mount /dev/nbd1 mountpoint
-<or if you used mkfs.btrfs instead, try `sudo mount /dev/nbd1 mountpoint -o compress=zlib` instead >
+<or if you used mkfs.btrfs instead, try `sudo mount /dev/nbd1 mountpoint -o compress=zlib` >
 ```
 - now the mountpoint folder should be cacdrive! :) 
 
