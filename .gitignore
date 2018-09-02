@@ -2,12 +2,11 @@ sectorindex.sec
 config.conf
 
 #<eclipse>
+Debug/
 .settings/
 .project
 .cproject
-Debug/
 #</eclipse>
-
 # Prerequisites
 *.d
 

@@ -1,0 +1,7 @@
+format=1
+explanation: config is line based, 1st line must be "format=1", 2nd line is ignored (but must exist), line 3 contains the username, line 4 contains the password, line 5 contains the number of worker threads you want (higher count should increase IO speed, and it does not depend on how many CPU cores you have.), line 6 contains the path to the sector index file, line 7 contains the nbd device to use (/dev/nbdX), and line 8 should not exist. a username or password or filepath containing newlines is not supported.
+user@name.com
+examplePassword123
+3
+sectorindex.sec
+/dev/nbd1
