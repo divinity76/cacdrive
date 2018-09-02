@@ -1344,12 +1344,7 @@ void cac_delete_eventually(const string& id)
 void init(const int argc, char **argv, const bool onlyapitests)
 {
 	install_shutdown_signal_handlers();
-	std::set_terminate([]()->void
-	{
-		myerror(0,errno,"uncaught exception!"); // this prints a stack trace.. no easy way to do that in c++, i think.
-			std::cout << "Unhandled exception\n";
-			std::abort();
-		});
+
 	atexit(exit_global_cleanup);
 	{
 		if (argc != 2)
