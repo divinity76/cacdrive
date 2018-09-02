@@ -1076,7 +1076,7 @@ void cac_upload_eventually(const uint64_t sectorpos_in, const uint32_t len,
 											upload_args.push_back(Downloadcacapi::Upload_multi_arg
 													{
 														.data=it.second,
-														.savename=string("sector_"+to_string((it.first))+".zip")
+														.savename=string("sector_"+to_string((it.first/SECTOR_SIZE))+".zip")
 													});
 											upload_meta_data.push_back(Upload_meta_data_struct
 													{
