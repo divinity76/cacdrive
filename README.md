@@ -11,7 +11,7 @@ also, unless the last line in the terminal is something like `upload queue empti
 here's how to get started, using a debian-based distro (Debian/Ubuntu/Proxmox/Devuan/whatever)
 (personally tested on debian 10 buster and ubuntu 18.04)
 ```sh
-sudo apt install g++ git libcurl4-openssl-dev nano nbd-client
+sudo apt install g++ git libcurl4-openssl-dev nano
 
 sudo modprobe nbd
 <modprobe should NOT give any output. if it does, that is probably an error.>
