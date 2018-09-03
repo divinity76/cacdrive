@@ -267,6 +267,7 @@ size_t efwrite(const void * ptr, const size_t size, const size_t count,
 	}
 	return ret;
 }
+static_assert(CURL_AT_LEAST_VERSION(7,56,0),"this program requires libcurl version >= \"7.56.0\", your libcurl version is \"" LIBCURL_VERSION "\", which is too old."  );
 //this  almost has to be a macro because of how curl_easy_setopt is made (a macro taking different kinds of parameter types)
 #define ecurl_easy_setopt(handle, option, parameter)({ \
 CURLcode ret_8uyr7t6sdygfhd=curl_easy_setopt(handle,option,parameter); \
