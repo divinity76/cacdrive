@@ -2542,7 +2542,7 @@ void cac_update_sectorcode(FILE *fp, const uint64_t sectornum,
 		const int original_errno = errno; // errno/ferror can be modified by ftell.
 		const auto original_ferror = ferror(fp);
 		const auto pos = ftell(fp);
-		myerror(EXIT_FAILURE, original_errno,
+		myerror(EXIT_FAILURE, original_errno,"%s",
 				string(
 						"cac_update_sectorcode() failed to read "
 								+ to_string(CAC_CODE_SIZE)
