@@ -20,7 +20,7 @@ git clone --depth 1 https://github.com/divinity76/cacdrive.git
 
 cd cacdrive
 
-g++ src/main.cpp -std=c++17 -lcurl -lpthread
+g++ src/main.cpp -std=c++17 -lcurl -lpthread -O2
 
 cp config.conf.dist config.conf
 
