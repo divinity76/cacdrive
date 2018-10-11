@@ -2,13 +2,20 @@
 #include <error.h>
 #include <err.h>
 #include <errno.h>
-#include <assert.h>
 #include <execinfo.h>
 #include <unistd.h>
 #include <string>
 #include <cstring>
 #include <chrono>
 #include <thread>
+#include <assert.h>
+
+#if defined(__GNUC__) && __GNUC__ < 6
+#error when using the gnu g++ compiler, version >= 6.0.0 is required for full c++17 std::shared_mutex support. your g++ version is too old.
+#endif
+#if defined(__clang_major__) && ( ( __clang_major__ < 3) || ( __clang_major__ == 3 && __clang_minor__ < 7 ) )
+#error when using the clang compiler, version >= 3.7.0 is required for full c++ std::shared_mutex support. your clang version is too old.
+#endif
 #include <mutex>
 #include <shared_mutex>
 #include <future>
