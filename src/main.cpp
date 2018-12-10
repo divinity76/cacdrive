@@ -267,7 +267,7 @@ size_t efwrite(const void * ptr, const size_t size, const size_t count,
 	}
 	return ret;
 }
-static_assert(CURL_AT_LEAST_VERSION(7,56,0),"this program requires libcurl version >= \"7.56.0\", your libcurl version is \"" LIBCURL_VERSION "\", which is too old."  );
+static_assert(CURL_AT_LEAST_VERSION(7,56,0),"this program requires libcurl version >= \"7.56.0\", your libcurl version is \"" LIBCURL_VERSION "\", which is too old." );
 //this  almost has to be a macro because of how curl_easy_setopt is made (a macro taking different kinds of parameter types)
 #define ecurl_easy_setopt(handle, option, parameter)({ \
 CURLcode ret_8uyr7t6sdygfhd=curl_easy_setopt(handle,option,parameter); \
@@ -1344,6 +1344,14 @@ void cac_delete_eventually(const string& id)
 
 void init(const int argc, char **argv, const bool onlyapitests)
 {
+	{
+		curl_version_info_data* curlv = curl_version_info( CURLVERSION_NOW);
+		if(!(curlv->features & CURL_VERSION_SSL)){
+			std::cerr
+					<< "error: libcurl was not compiled with SSL/TLS support, which cacdrive requires (TLS is required to login @cac cloud storage system)\n";
+			exit(1);
+		}
+	}
 	install_shutdown_signal_handlers();
 
 	atexit(exit_global_cleanup);
@@ -2542,7 +2550,7 @@ void cac_update_sectorcode(FILE *fp, const uint64_t sectornum,
 		const int original_errno = errno; // errno/ferror can be modified by ftell.
 		const auto original_ferror = ferror(fp);
 		const auto pos = ftell(fp);
-		myerror(EXIT_FAILURE, original_errno,"%s",
+		myerror(EXIT_FAILURE, original_errno, "%s",
 				string(
 						"cac_update_sectorcode() failed to read "
 								+ to_string(CAC_CODE_SIZE)
