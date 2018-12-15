@@ -1346,11 +1346,13 @@ void init(const int argc, char **argv, const bool onlyapitests)
 {
 	{
 		curl_version_info_data* curlv = curl_version_info( CURLVERSION_NOW);
-		if(!(curlv->features & CURL_VERSION_SSL)){
+		if (!(curlv->features & CURL_VERSION_SSL))
+		{
 			std::cerr
 					<< "error: libcurl was not compiled with SSL/TLS support, which cacdrive requires (TLS is required to login @cac cloud storage system)\n";
 			exit(1);
 		}
+
 	}
 	install_shutdown_signal_handlers();
 
