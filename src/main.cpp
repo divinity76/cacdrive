@@ -2090,7 +2090,8 @@ if (unlikely(realbuffer.buffer_size < minsize)) { \
 			{
 				//todo: einval
 				myerror(EXIT_FAILURE, 0,
-						"got a sector-unaligned read! not yet supported!");
+						"got a sector-unaligned read! not yet supported! %" PRIu32 " bytes, sector size: %i",
+						len, SECTOR_SIZE);
 			}
 			if (likely(len != 0))
 			{
