@@ -186,36 +186,6 @@ void noget(T&& in)
 	vec.push_back(std::move(in));
 	vmut.unlock();
 }
-uint64_t nigghash(char * buf, size_t len)
-{
-	uint64_t ret = 0;
-	uint64_t curr;
-	while (len > 0)
-	{
-		if (len >= 8)
-		{
-			len -= 8;
-			curr = *(uint64_t*) &buf[len];
-		}
-		else if (len >= 4)
-		{
-			len -= 4;
-			curr = *(uint32_t*) &buf[len];
-		}
-		else if (len >= 2)
-		{
-			len -= 2;
-			curr = *(uint16_t*) &buf[len];
-		}
-		else
-		{
-			--len;
-			curr = *(uint8_t*) &buf[len];
-		}
-		ret += curr;
-	}
-	return ret;
-}
 void *emalloc(const size_t size)
 {
 	void *ret = malloc(size);
