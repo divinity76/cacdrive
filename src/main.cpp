@@ -2471,8 +2471,8 @@ vector<string> cac_get_sector_codes(const size_t pos, const size_t length,
 {
 //pos and length is guaranteed to be sector-aligned at this point.
 	vector<string> ret;
-	const int number_of_sectors = size_t(
-			ceil(float(length) / float(BLOCK_SIZE)));
+	const size_t number_of_sectors = size_t(
+			ceil(double(length) / double(BLOCK_SIZE)));
 	ret.reserve(number_of_sectors);
 	const size_t start = size_t(floor(double(pos) / double(SECTOR_SIZE)));
 	const size_t end = size_t(
