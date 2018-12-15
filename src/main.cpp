@@ -34,6 +34,7 @@ enum
 {
 	SECTOR_SIZE = 4096, BLOCK_SIZE = 4096, CAC_CODE_SIZE = 25
 };
+static_assert((sizeof(size_t) > 4),"32bit systems are not officially supported.. feel free to complain in the bugtracker if this is an issue for you. (sizeof(size_t) <=4)" );
 string argv_username;
 string argv_password;
 string sectorindex_file;
@@ -2350,7 +2351,7 @@ void cac_get_data(Downloadcacapi& cac, const uint64_t pos, const uint32_t len,
 	uint64_t bpos = (codes.size() * SECTOR_SIZE);
 	uint64_t i = end;
 	vector<array<uint64_t, 2>> need_to_download;
-	need_to_download.reserve(codes.size()); //worst case scenario (but probably not rare), 0 empty sectors & nothing in io_cache
+	need_to_download.reserve(codes.size()); //worst case scenario (but probably not rare): 0 empty sectors & nothing in io_cache
 	for (ssize_t vi = codes.size() - 1; vi >= 0; --vi)
 	{
 		assert(codes[vi].length() == CAC_CODE_SIZE);
@@ -2380,7 +2381,7 @@ void cac_get_data(Downloadcacapi& cac, const uint64_t pos, const uint32_t len,
 	}
 	assert(bpos == 0);
 	{
-		int vi = codes.size() - 1;
+		size_t vi = codes.size() - 1;
 		for (const string& data : cac.download_multi(codes))
 		{
 			assert(data.length() == SECTOR_SIZE);
@@ -2470,23 +2471,24 @@ vector<string> cac_get_sector_codes(const size_t pos, const size_t length,
 {
 //pos and length is guaranteed to be sector-aligned at this point.
 	vector<string> ret;
-	const int number_of_sectors = int(ceil(float(length) / float(BLOCK_SIZE)));
+	const int number_of_sectors = size_t(
+			ceil(float(length) / float(BLOCK_SIZE)));
 	ret.reserve(number_of_sectors);
-	const int start = int(floor(double(pos) / double(SECTOR_SIZE)));
-	const int end = int(
+	const size_t start = size_t(floor(double(pos) / double(SECTOR_SIZE)));
+	const size_t end = size_t(
 			floor(double(start) + (double(length - 1) / double(SECTOR_SIZE))));
 	char buf[CAC_CODE_SIZE];
 // this lock()/unlock() could be done on every iteration, but i'm not sure that would go any faster.
 	sector_readwrite_mutex.lock();
-	for (int i = start; i <= end; ++i)
+	for (size_t i = start; i <= end; ++i)
 	{
 		{
-			const int err = fseek(fp, (i * CAC_CODE_SIZE), SEEK_SET);
+			const int err = fseek(fp, size_t(i * CAC_CODE_SIZE), SEEK_SET);
 			if (unlikely(err != 0))
 			{
 				myerror(EXIT_FAILURE, err,
-						"failed to seek to %i in sector file %s",
-						(i * CAC_CODE_SIZE), sectorindex_file.c_str());
+						"failed to seek to %zu in sector file %s",
+						size_t(i * CAC_CODE_SIZE), sectorindex_file.c_str());
 			}
 		}
 		{
