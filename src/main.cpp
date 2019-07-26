@@ -79,24 +79,25 @@ void nbdreply(const int fd, const void *buf1, const size_t buf1_size,
 void cac_delete_eventually(const string& id);
 //</headache>
 #if !defined(likely)
-// compilers known to support it: gnu gcc, intel icc, clang, IBMc, Cray C
-#if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__) || (defined(__IBMC__) || defined(__IBMCPP__)) || defined(_CRAYC)
+// compilers known to support it: gnu gcc, intel icc, clang, IBM C, Cray C
+#if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__) ||    \
+    (defined(__IBMC__) || defined(__IBMCPP__)) || defined(_CRAYC)
 #if defined(__cplusplus)
 // https://stackoverflow.com/a/43870188/1067003
-#define likely(x)       __builtin_expect(static_cast<bool>((x)),1)
-#define unlikely(x)     __builtin_expect(static_cast<bool>((x)),0)
+#define likely(x) __builtin_expect(static_cast<bool>((x)), 1)
+#define unlikely(x) __builtin_expect(static_cast<bool>((x)), 0)
 #else
-#define likely(x)       __builtin_expect(!!(x),1)
-#define unlikely(x)     __builtin_expect(!!(x),0)
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
 #endif
 #else
-// compilers known to _not_ support it: tcc, msvc, Digital Mars
+// compilers known to _not_ support it: tcc (TinyC), msvc, Digital Mars
 #if defined(__TINYC__) || defined(_MSC_VER) || defined(__DMC__)
 #define likely(x) (x)
 #define unlikely(x) (x)
 #else
-// unknown compiler 
-#warning support for __builtin_expect is unknown on this compiler, and code may run slower as a result. please submit a bugreport.
+// unknown compiler
+#warning support for __builtin_expect() is unknown on this compiler. please submit a bugreport.
 #define likely(x) (x)
 #define unlikely(x) (x)
 #endif
